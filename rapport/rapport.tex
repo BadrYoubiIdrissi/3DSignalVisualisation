@@ -1,0 +1,28 @@
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper]{geometry}
+\usepackage{babel}
+\usepackage[cache=false]{minted}
+
+\title{Rapport Développement Logiciel}
+\author{Badr YOUBI IDRISSI}
+
+\begin{document}
+	
+\section{Introduction}
+
+\section{Description du code}
+	
+\subsection{Main}
+\begin{minted}{python}
+def signal(p, dico):
+	outside, d_min = dico['defZone'].Distance_Between_a_Point_and_the_Modules(p)
+	if outside:
+		return sum(1/d_min)
+	else:
+		return 2*max(isoligne)
+\end{minted}	
+
+\end{document}
