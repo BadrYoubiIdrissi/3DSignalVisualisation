@@ -14,16 +14,17 @@
 \author{Badr YOUBI IDRISSI}
 
 \begin{document}
-	
+\maketitle
 \section{Introduction et fonctionnement général}
 
 Dans ce projet nous codons un programme pour visualiser les isolignes 
-d'un signal émit de plusieurs tétraèdres. Voici un schéma du fonctionnement
-général :
+d'un signal émit de plusieurs tétraèdres. 
 
-\begin{center}
+\begin{figure}[h]
+	\centering
 	\includegraphics[width=0.7\textwidth]{Figures/SchemaNum.png}
-\end{center}
+	\caption{Schéma du fonctionnement général}
+\end{figure}
 
 On commence par créer l'objet 'Mesh' (\textit{I}) qui correspond à l'ensemble des pods émétant le signal.
 L'objet mesh a besoin des points correspondant à chaque pod qui est un 'Tétraèdre' (\textit{II}) qui lui
@@ -63,7 +64,12 @@ puis $ \vec{n} = \frac{\overrightarrow{n'}}{\|\overrightarrow{n'}\|}$
 Pour la fonction de calcul de distance la fonction projète le point sur le plab du triangle puis selon 
 les valeurs des coordonnées barycentriques on retourne la plus petite distance à un coin ou à un bord.
 Au vu du grand nombre de cas, j'ai opté pour reprendre un code déjà fait qui applique ce principe 
-(voir \href{run:https://gist.github.com/joshuashaffer/99d58e4ccbd37ca5d96e}{code})
+(voir \href{run:https://gist.github.com/joshuashaffer/99d58e4ccbd37ca5d96e}{code}) en l'adaptant en rajoutant
+la condition 
+\begin{minted}[breakanywhere, xleftmargin=10pt]{python}
+normal_side  = np.dot(self.normal, P) > np.dot(self.normal,self.points[0])
+\end{minted}
+car un point est du bon coté du plan du triangle si $ \langle\vec{p},\vec{n}\rangle > \langle\vec{A},\vec{n}\rangle$
 
 \subsection{Objet II: Tetra}
 \vspace{10pt}
@@ -79,13 +85,34 @@ class tetra:
 
 L'objet tetra est un ensemble de triangles correctement orientés (normales vers l'extérieur) qui peut
 calculer la distance entre un point et le tetra.
-\begin{minted}[breakanywhere=true	, xleftmargin=10pt]{python}
+\begin{minted}[breakanywhere=true, xleftmargin=10pt]{python}
 def __init__(self, point1, point2, point3, point4):
 	self.points = [point1, point2,point3,point4]
 	self.faces = [tri(point1,point3,point2), tri(point1,point4,point3),
 				 tri(point2,point3,point4), tri(point1,point2,point4)]
 \end{minted}
 L'ordre des points ici est important pour bien orienter les normales.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/TetraNormals.png}
+	\caption{Tétraèdre avec normales}
+\end{figure}
+
+\begin{minted}[breakanywhere=true, xleftmargin=10pt]{python}
+def distance_to_a_point(self, p):
+	d_min = np.inf 
+	outside = False
+	
+	for f in self.faces:
+		[normal_side, d_minTri] = f.distance_to_a_point(p)
+		outside = outside or normal_side
+		if d_minTri < d_min:
+			d_min = d_minTri
+	
+	return [outside, d_min] 
+\end{minted}
+la distance à un Tetraèdre est le minimum de distance aux autres triangles. sachant que si le point
+est du mauvais côté la distance est infini.
 
 
 \end{document}
