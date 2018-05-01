@@ -260,9 +260,15 @@ On commence par calculer la fonction d'interêt en les coins puis on regarde si 
 et si oui on crée récursivement des branches en subdivisant le plan en 4. Tout ceci en vérifiant qu'on ne
 dépasse pas la profondeur maximale et qu'on dépasse au moins la profondeur minimale.
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/Quadtree.png}
+	\caption{Test du quadtree}
+\end{figure}
+
 La fonction qui nous interesse ici est le signal en un point de l'espace. 
 
-\begin{minted}{python}
+\begin{minted}[xleftmargin=10pt]{python}
 def signal(p, dico):
     outside, d_min = dico['defZone'].Distance_Between_a_Point_and_the_Modules(p)
 	if outside:
@@ -271,9 +277,11 @@ def signal(p, dico):
 		return 2*max(isoligne)
 \end{minted}
 
-et la fonction qui définit si oui ou non le carré actuel est un point d'interêt est 
+\newpage
 
-\begin{minted}{python}
+La fonction qui définit si oui ou non le carré actuel est un point d'interêt est 
+
+\begin{minted}[xleftmargin=10pt]{python}
 def test_function(r0, r1, r2, r3, dico):
     cond = False
     for iso in dico['r_target']:
@@ -281,7 +289,130 @@ def test_function(r0, r1, r2, r3, dico):
                         & ((r0 >= iso) | (r1 >= iso) | (r2 >= iso) | (r3 >= iso))
     return cond
 \end{minted}
-
 cette fonction regarde si la valeur d'une des isolignes est comprise entre les valeurs des coins du carré.
 
+\subsection{Objet IV : FileVTK}
+
+Cette objet gère l'enregistrement des données sous la forme d'un fichier au format vtk
+qui permet de visualiser sous ParaView.
+
+\begin{minted}[xleftmargin=10pt]{python}
+
+class FileVTK:
+
+    def __init__(self, FileName, Comment):
+		...
+    def SavePoints(self, PointList):
+        ...
+    def SaveConnectivity(self, Connectivity):
+		...
+	def CreatePointScalarSection(self,Points):
+		...        
+    def SavePointScalar(self, Label, Values):
+		...    
+    def close(self):
+        ...
+
+\end{minted}
+
+On commence par enregistrer les variables necessaire dans l'objet et on initialise le fichier VTK.
+
+\begin{minted}[xleftmargin=10pt]{python}
+def __init__(self, FileName, Comment):
+	self.FileName = FileName+".vtk"
+	self.file = open(self.FileName, "w")
+	self.writel("# vtk DataFile Version 3.1")
+	self.writel(Comment)
+	self.writel("ASCII")
+	print("File: " + self.FileName + " Opened and initiated")
+\end{minted}
+
+Ensuite on sauvegarde dans le fichier la partie correspondant aux points
+
+\begin{minted}[xleftmargin=10pt]{python}	
+def SavePoints(self, PointList):
+	self.points=PointList
+	self.writel("DATASET UNSTRUCTURED_GRID")
+	self.writel("POINTS " + str(len(self.points)) + " FLOAT")
+	for point in self.points:
+		self.writel("  "+str(point[0])+" "+str(point[1])+" "+str(point[2]))
+	print("Points saved in "+self.FileName)
+\end{minted}
+
+Puis on enregistre la partie correspondant aux connectivités.
+
+\begin{minted}[xleftmargin=10pt]{python}
+def SaveConnectivity(self, Connectivity):
+	size = 0
+	for c in Connectivity:
+		size += len(c)
+	self.writel("CELLS "+str(len(Connectivity))+" "+str(size))
+	for c in Connectivity:
+		self.file.write("  ")
+		for i in range(len(c)):
+			if i == 0:
+				self.file.write(str(len(c)-1))
+				self.file.write(" ")
+			else:
+				self.file.write(str(c[i]))
+				self.file.write(" ")
+		self.file.write("\n")
+	self.writel("CELL_TYPES "+str(len(Connectivity)))
+	for c in Connectivity:
+		n = len(c)-1
+		if c[0] == "2D":
+			if n == 3:
+				celltype = 5
+			if n == 4:
+				celltype = 9
+			if n == 2:
+				celltype = 3
+		else:
+			if n == 4:
+				celltype = 10
+			if n == 8:
+				celltype = 12
+		self.writel("  "+str(celltype))
+	print("Connectivity saved")
+\end{minted}
+
+Ces deux fonctions enregistrent la partie correspondant aux valeurs associées au points.
+
+\begin{minted}[xleftmargin=10pt]{python}	
+def CreatePointScalarSection(self,Points):
+	self.writel("POINT_DATA "+str(len(Points)))
+\end{minted}
+
+\begin{minted}[xleftmargin=10pt]{python}
+def SavePointScalar(self, Label, Values):
+	self.writel("SCALARS "+Label+" float")
+	self.writel("LOOKUP_TABLE default")
+	for v in Values:
+		self.writel("  "+str(v))
+\end{minted}
+
+Cette fonction ferme le fichier.
+
+\begin{minted}[xleftmargin=10pt]{python}	
+def close(self):
+	self.file.close()
+	print("File Closed")
+\end{minted}
+
+Tout les autres objets ont une fonction Create\_Mesh\_And\_Connectivity\_List qui rajoute à la liste List\_Of\_Point la liste des points
+que l'objet génére et à la liste Connectivity comment les relier dans Paraview.
+
+\section{Résutat}
+Le programme marche bien et donne ceci pour les isolignes 1.1 1.2 et 1.5
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/FinalWhite2.png}
+	\caption{Résultat}
+\end{figure}
+
+\section{Conclusion}
+
+
 \end{document}
+
