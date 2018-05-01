@@ -89,7 +89,6 @@ class tri:
         Connectivity.append(["2D", len(List_Of_Point)-5, len(List_Of_Point)-4, len(List_Of_Point)-3])
         Connectivity.append(["2D", len(List_Of_Point)-2, len(List_Of_Point)-1])
 
-
     def distance_to_a_point(self, P):
         
         TRI = np.array(self.points)

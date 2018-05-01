@@ -3,8 +3,6 @@ from QuadTree3 import tree_amr
 from vtk import FileVTK
 import numpy as np
 
-isoligne = [1,1.2,1.5]
-
 def signal(p, dico):
     outside, d_min = dico['defZone'].Distance_Between_a_Point_and_the_Modules(p)
     if outside:
@@ -24,15 +22,15 @@ defense_zone = mesh("defense_zone.txt")
 
 meshSize = 20.0
 meshHeight = 0.01
+depth_max = 15
+depth = 0 
+isoligne = [1,1.2,1.5]
 point1 = np.array([-meshSize, -meshSize, meshHeight])
 point2 = np.array([meshSize, -meshSize, meshHeight])
 point3 = np.array([meshSize, meshSize, meshHeight])
 point4 = np.array([-meshSize, meshSize, meshHeight])
 
-depth_max = 15
-depth = 0 
-
-dico = {}  # this dictionnary is used to send any structure to the quad_tree
+dico = {}
 dico['eval_function'] = signal
 dico['refine_or_not'] = test_function
 dico['center']        = [0.0 , 0.0, 0.0]
