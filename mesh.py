@@ -44,12 +44,12 @@ class mesh:
     def getNextValue(self):
         return self.file.readline().strip().split(" : ")[1]
         
-    def toVector(_,string):
+    def toVector(self,string):
         arr = string.split(" ")
         arr = [float(e) for e in arr]
         return np.array(arr)
     
-    def radialVect(_,angle_in_degrees):
+    def radialVect(self,angle_in_degrees):
         i_x = np.array([1.0,0.0,0.0])
         i_y = np.array([0.0,1.0,0.0])
         return np.cos(angle_in_degrees*np.pi/180)*i_x + np.sin(angle_in_degrees*np.pi/180)*i_y
