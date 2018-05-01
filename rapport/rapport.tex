@@ -197,4 +197,91 @@ Cette fonction calcule la liste des distances et si oui ou non le points et dans
 	\caption{Objet mesh visualisé}
 \end{figure}
 
+\subsection{Objet V: QuadTree}
+
+L'objet QuadTree est un objet qui raffine un maillage 2D selon les zones d'interêt.
+\begin{minted}[xleftmargin=10pt]{python}
+class tree_amr:
+	def __init__(self, point_0, point_1, point_2, point_3, depth, depth_max, dico):
+		...
+	def Get_values(self, List_Of_Values):
+		...
+\end{minted}
+
+Le gros du fonctionnement est dans l'initialisation :
+
+\begin{minted}{python}
+
+self.branch = False
+
+#    store the information locally in the memory for the leaf 
+self.point_0 = point_0
+self.point_1 = point_1
+self.point_2 = point_2
+self.point_3 = point_3
+self.depth_max = depth_max
+self.depth = depth
+self.dico = dico
+
+r0 = self.dico['eval_function'](self.point_0,self.dico)
+r1 = self.dico['eval_function'](self.point_1,self.dico)
+r2 = self.dico['eval_function'](self.point_2,self.dico)
+r3 = self.dico['eval_function'](self.point_3,self.dico)
+
+self.val0 = r0
+self.val1 = r1
+self.val2 = r2
+self.val3 = r3
+
+if (depth < depth_max):
+
+#   if the depth of the leaf is lower that the maximum depth 
+#   then we check if we need to transform the leaf into a branch
+#   We must transform the leaf into a branch 
+
+  if self.dico['refine_or_not'](r0,r1,r2,r3, dico) or depth <= self.dico['level_min']:
+
+  self.branch = True
+
+  point_4 = (point_0+point_2) / 2
+  point_5 = (point_0+point_1) / 2
+  point_6 = (point_1+point_2) / 2
+  point_7 = (point_2+point_3) / 2
+  point_8 = (point_0+point_3) / 2
+
+  self.child_up_left = tree_amr(point_8, point_4, point_7, point_3, depth+1, depth_max, dico)
+  self.child_up_right = tree_amr(point_4, point_6, point_2, point_7, depth+1, depth_max, dico)
+  self.child_down_left = tree_amr(point_0, point_5, point_4, point_8, depth+1, depth_max, dico)
+  self.child_down_right = tree_amr(point_5, point_1, point_6, point_4, depth+1, depth_max, dico)
+
+\end{minted}
+
+On commence par calculer la fonction d'interêt en les coins puis on regarde si ces valeurs nous interessent
+et si oui on crée récursivement des branches en subdivisant le plan en 4. Tout ceci en vérifiant qu'on ne
+dépasse pas la profondeur maximale et qu'on dépasse au moins la profondeur minimale.
+
+La fonction qui nous interesse ici est le signal en un point de l'espace. 
+
+\begin{minted}{python}
+def signal(p, dico):
+    outside, d_min = dico['defZone'].Distance_Between_a_Point_and_the_Modules(p)
+	if outside:
+		return sum(1/d_min)
+	else:
+		return 2*max(isoligne)
+\end{minted}
+
+et la fonction qui définit si oui ou non le carré actuel est un point d'interêt est 
+
+\begin{minted}{python}
+def test_function(r0, r1, r2, r3, dico):
+    cond = False
+    for iso in dico['r_target']:
+        cond = cond or ((r0 <  iso) | (r1 <  iso) | (r2 <  iso) | (r3 <  iso)) \
+                        & ((r0 >= iso) | (r1 >= iso) | (r2 >= iso) | (r3 >= iso))
+    return cond
+\end{minted}
+
+cette fonction regarde si la valeur d'une des isolignes est comprise entre les valeurs des coins du carré.
+
 \end{document}
