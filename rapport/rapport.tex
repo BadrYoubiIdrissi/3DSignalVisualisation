@@ -126,7 +126,7 @@ class mesh:
 		...
 	def toVector(self,string):
 		...
-	def	radialVect(self,angle_in_degrees):
+	def radialVect(self,angle_in_degrees):
 		...
 	def Create_Mesh_And_Connectivity_List(self, List_Of_Point, Connectivity):
 		...
@@ -135,4 +135,285 @@ class mesh:
 
 \end{minted}
 
+L'objet mesh génère des Tétraèdres à partir du fichier 'defense\_zone.txt' qui en donne les centres des bases équilatérales et
+les hauteur. Les fonctions getNextValue, toVector et radialVect sont des fonctions auxiliaires.
+
+\begin{minted}[xleftmargin=10pt]{python}
+def __init__ (self, DefenseFile):
+	self.List_Of_Modules = []
+	self.file = open(DefenseFile)
+	self.number_modules = int(self.getNextValue())
+	
+	for i in range(self.number_modules):
+		center = self.toVector(self.getNextValue())
+		base_length = float(self.getNextValue())
+		height = float(self.getNextValue())
+		rotation = float(self.getNextValue())
+		i_z = np.array([0.0,0.0,1.0]) 
+		
+		distanceFromCenter = (np.sqrt(3)/3)*base_length
+		point1 = center + self.radialVect(rotation)*distanceFromCenter
+		point2 = center + self.radialVect(rotation + 120)*distanceFromCenter
+		point3 = center + self.radialVect(rotation + 240)*distanceFromCenter
+		point4 = center + height*i_z
+		
+		self.List_Of_Modules.append(tetra(point1, point2, point3, point4))
+
+def getNextValue(self):
+	return self.file.readline().strip().split(" : ")[1]
+
+def radialVect(self,angle_in_degrees):
+	i_x = np.array([1.0,0.0,0.0])
+	i_y = np.array([0.0,1.0,0.0])
+	return np.cos(angle_in_degrees*np.pi/180)*i_x + np.sin(angle_in_degrees*np.pi/180)*i_y
+
+
+\end{minted}
+
+Pour trouver les coordonnées du tétraèdres à partir des informations données on commence par
+trouver la distance entre le centre et chacun des points de la base qui est égale
+à $\frac{\sqrt{3}}{3}d$ avec d la longueur de la base. Le triangle est donc 3 points équidistants sur le cercle de rayon
+$\frac{\sqrt{3}}{3}d$. On calcule le vecteur radial avec radialVect. getNextValue lit la ligne suivante et enlève le saut de ligne
+et donne la valeur après les deux points.
+
+\begin{minted}[xleftmargin=10pt]{python}
+def Distance_Between_a_Point_and_the_Modules(self, p):
+
+	outside = True
+	d_min = []
+	
+	for t in self.List_Of_Modules:
+		[outsidet, d_mint] = t.distance_to_a_point(p)
+		outside = outside and outsidet
+		d_min.append(d_mint)
+	
+	return [outside, np.array(d_min)]
+\end{minted}
+
+Cette fonction calcule la liste des distances et si oui ou non le points et dans un des pods.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/Deffensezone.png}
+	\caption{Objet mesh visualisé}
+\end{figure}
+
+\subsection{Objet V: QuadTree}
+
+L'objet QuadTree est un objet qui raffine un maillage 2D selon les zones d'interêt.
+\begin{minted}[xleftmargin=10pt]{python}
+class tree_amr:
+	def __init__(self, point_0, point_1, point_2, point_3, depth, depth_max, dico):
+		...
+	def Get_values(self, List_Of_Values):
+		...
+\end{minted}
+
+Le gros du fonctionnement est dans l'initialisation :
+
+\begin{minted}{python}
+
+self.branch = False
+
+#    store the information locally in the memory for the leaf 
+self.point_0 = point_0
+self.point_1 = point_1
+self.point_2 = point_2
+self.point_3 = point_3
+self.depth_max = depth_max
+self.depth = depth
+self.dico = dico
+
+r0 = self.dico['eval_function'](self.point_0,self.dico)
+r1 = self.dico['eval_function'](self.point_1,self.dico)
+r2 = self.dico['eval_function'](self.point_2,self.dico)
+r3 = self.dico['eval_function'](self.point_3,self.dico)
+
+self.val0 = r0
+self.val1 = r1
+self.val2 = r2
+self.val3 = r3
+
+if (depth < depth_max):
+
+#   if the depth of the leaf is lower that the maximum depth 
+#   then we check if we need to transform the leaf into a branch
+#   We must transform the leaf into a branch 
+
+  if self.dico['refine_or_not'](r0,r1,r2,r3, dico) or depth <= self.dico['level_min']:
+
+  self.branch = True
+
+  point_4 = (point_0+point_2) / 2
+  point_5 = (point_0+point_1) / 2
+  point_6 = (point_1+point_2) / 2
+  point_7 = (point_2+point_3) / 2
+  point_8 = (point_0+point_3) / 2
+
+  self.child_up_left = tree_amr(point_8, point_4, point_7, point_3, depth+1, depth_max, dico)
+  self.child_up_right = tree_amr(point_4, point_6, point_2, point_7, depth+1, depth_max, dico)
+  self.child_down_left = tree_amr(point_0, point_5, point_4, point_8, depth+1, depth_max, dico)
+  self.child_down_right = tree_amr(point_5, point_1, point_6, point_4, depth+1, depth_max, dico)
+
+\end{minted}
+
+On commence par calculer la fonction d'interêt en les coins puis on regarde si ces valeurs nous interessent
+et si oui on crée récursivement des branches en subdivisant le plan en 4. Tout ceci en vérifiant qu'on ne
+dépasse pas la profondeur maximale et qu'on dépasse au moins la profondeur minimale.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/Quadtree.png}
+	\caption{Test du quadtree}
+\end{figure}
+
+La fonction qui nous interesse ici est le signal en un point de l'espace. 
+
+\begin{minted}[xleftmargin=10pt]{python}
+def signal(p, dico):
+    outside, d_min = dico['defZone'].Distance_Between_a_Point_and_the_Modules(p)
+	if outside:
+		return sum(1/d_min)
+	else:
+		return 2*max(isoligne)
+\end{minted}
+
+\newpage
+
+La fonction qui définit si oui ou non le carré actuel est un point d'interêt est 
+
+\begin{minted}[xleftmargin=10pt]{python}
+def test_function(r0, r1, r2, r3, dico):
+    cond = False
+    for iso in dico['r_target']:
+        cond = cond or ((r0 <  iso) | (r1 <  iso) | (r2 <  iso) | (r3 <  iso)) \
+                        & ((r0 >= iso) | (r1 >= iso) | (r2 >= iso) | (r3 >= iso))
+    return cond
+\end{minted}
+cette fonction regarde si la valeur d'une des isolignes est comprise entre les valeurs des coins du carré.
+
+\subsection{Objet IV : FileVTK}
+
+Cette objet gère l'enregistrement des données sous la forme d'un fichier au format vtk
+qui permet de visualiser sous ParaView.
+
+\begin{minted}[xleftmargin=10pt]{python}
+
+class FileVTK:
+
+    def __init__(self, FileName, Comment):
+		...
+    def SavePoints(self, PointList):
+        ...
+    def SaveConnectivity(self, Connectivity):
+		...
+	def CreatePointScalarSection(self,Points):
+		...        
+    def SavePointScalar(self, Label, Values):
+		...    
+    def close(self):
+        ...
+
+\end{minted}
+
+On commence par enregistrer les variables necessaire dans l'objet et on initialise le fichier VTK.
+
+\begin{minted}[xleftmargin=10pt]{python}
+def __init__(self, FileName, Comment):
+	self.FileName = FileName+".vtk"
+	self.file = open(self.FileName, "w")
+	self.writel("# vtk DataFile Version 3.1")
+	self.writel(Comment)
+	self.writel("ASCII")
+	print("File: " + self.FileName + " Opened and initiated")
+\end{minted}
+
+Ensuite on sauvegarde dans le fichier la partie correspondant aux points
+
+\begin{minted}[xleftmargin=10pt]{python}	
+def SavePoints(self, PointList):
+	self.points=PointList
+	self.writel("DATASET UNSTRUCTURED_GRID")
+	self.writel("POINTS " + str(len(self.points)) + " FLOAT")
+	for point in self.points:
+		self.writel("  "+str(point[0])+" "+str(point[1])+" "+str(point[2]))
+	print("Points saved in "+self.FileName)
+\end{minted}
+
+Puis on enregistre la partie correspondant aux connectivités.
+
+\begin{minted}[xleftmargin=10pt]{python}
+def SaveConnectivity(self, Connectivity):
+	size = 0
+	for c in Connectivity:
+		size += len(c)
+	self.writel("CELLS "+str(len(Connectivity))+" "+str(size))
+	for c in Connectivity:
+		self.file.write("  ")
+		for i in range(len(c)):
+			if i == 0:
+				self.file.write(str(len(c)-1))
+				self.file.write(" ")
+			else:
+				self.file.write(str(c[i]))
+				self.file.write(" ")
+		self.file.write("\n")
+	self.writel("CELL_TYPES "+str(len(Connectivity)))
+	for c in Connectivity:
+		n = len(c)-1
+		if c[0] == "2D":
+			if n == 3:
+				celltype = 5
+			if n == 4:
+				celltype = 9
+			if n == 2:
+				celltype = 3
+		else:
+			if n == 4:
+				celltype = 10
+			if n == 8:
+				celltype = 12
+		self.writel("  "+str(celltype))
+	print("Connectivity saved")
+\end{minted}
+
+Ces deux fonctions enregistrent la partie correspondant aux valeurs associées au points.
+
+\begin{minted}[xleftmargin=10pt]{python}	
+def CreatePointScalarSection(self,Points):
+	self.writel("POINT_DATA "+str(len(Points)))
+\end{minted}
+
+\begin{minted}[xleftmargin=10pt]{python}
+def SavePointScalar(self, Label, Values):
+	self.writel("SCALARS "+Label+" float")
+	self.writel("LOOKUP_TABLE default")
+	for v in Values:
+		self.writel("  "+str(v))
+\end{minted}
+
+Cette fonction ferme le fichier.
+
+\begin{minted}[xleftmargin=10pt]{python}	
+def close(self):
+	self.file.close()
+	print("File Closed")
+\end{minted}
+
+Tout les autres objets ont une fonction Create\_Mesh\_And\_Connectivity\_List qui rajoute à la liste List\_Of\_Point la liste des points
+que l'objet génére et à la liste Connectivity comment les relier dans Paraview.
+
+\section{Résutat}
+Le programme marche bien et donne ceci pour les isolignes 1.1 1.2 et 1.5
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Figures/Finalwhite2.png}
+	\caption{Résultat}
+\end{figure}
+
+\section{Conclusion}
+
+
 \end{document}
+

@@ -109,8 +109,6 @@ class tree_amr:
             self.child_down_left.Create_Mesh_And_Connectivity_List(List_Of_Point, Connectivity)
             self.child_down_right.Create_Mesh_And_Connectivity_List(List_Of_Point, Connectivity)
     
-            
-
     def Get_values(self, List_Of_Values):
         if not self.branch:
             List_Of_Values.append(self.val0)
