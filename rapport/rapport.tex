@@ -2,7 +2,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
-\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[a4paper]{geometry}
 \usepackage{babel}
 \usepackage[cache=false]{minted}
 \usepackage{graphicx}
@@ -404,16 +404,23 @@ Tout les autres objets ont une fonction Create\_Mesh\_And\_Connectivity\_List qu
 que l'objet génére et à la liste Connectivity comment les relier dans Paraview.
 
 \section{Résutat}
-Le programme marche bien et donne ceci pour les isolignes 1.1 1.2 et 1.5
+Le programme marche bien et donne les figures ci dessous pour les isolignes 1.1 1.2 et 1.5
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.7\textwidth]{Figures/Finalwhite2.png}
-	\caption{Résultat}
-\end{figure}
+\begin{center}
+	\includegraphics[width=0.9\textwidth]{Figures/Finalwhite2.png}
+	\includegraphics[width=0.9\textwidth]{Figures/Finalwhite.png}
+\end{center}
 
 \section{Conclusion}
-
+	Ce projet fut très intéressant. Tant au niveau technique (programmation des différentes fonctions et débuggage)
+	qu'au niveu paradigme. En effet, la programmation orienté objet (dont je comprenais dèjà le principe) vu dans un cas
+	pratique comme celui-ci permet de bien en comprendre l'interêt. Le programme décomposé en une multitude d'étapes et
+	"d'objets" devient beaucoup plus compréhensible et faisable. Cela permet aussi de bien visualiser le fonctionnement (cf Schema 1).
+	Ceci n'aurais pas été possible sans l'aide de l'énoncé et des fichiers fournis qui m'ont guidé tout du long. La démarche
+	de validation de chaque bout de code (Unit testing) introduit à chaque fin de fichier s'est aussi avérée indispensable.
+	Cela aurait été impossible de coder le tout pour ne se rendre compte qu'à la fin des maintes problèmes qui se glissent dans le code.
+	Finalement, Il y a quelquechose de très satisfaisant à faire tourner un ensemble de code qu'on a fait nous même pour arriver à un
+	résultat aussi concret.
 
 \end{document}
 
