@@ -26,7 +26,7 @@ class mesh:
         self.file = open(DefenseFile)
         self.number_modules = int(self.getNextValue())
         
-        for i in range(self.number_modules):
+        for _ in range(self.number_modules):
             center = self.toVector(self.getNextValue())
             base_length = float(self.getNextValue())
             height = float(self.getNextValue())

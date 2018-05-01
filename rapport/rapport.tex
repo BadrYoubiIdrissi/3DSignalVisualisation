@@ -58,7 +58,8 @@ def __init__(self, point1, point2, point3):
 	self.normal = np.cross(p1p2, p1p3)
 	self.normal = self.normal/np.linalg.norm(self.normal)
 \end{minted}
-On enregistre les points A, B et C et on calcule la normale $ \overrightarrow{n'} = \overrightarrow{AB} \times \overrightarrow{AC} $
+On enregistre les points A, B et C et on calcule la normale $ \overrightarrow{n'} = \overrightarrow{AB}
+ \times \overrightarrow{AC} $
 puis $ \vec{n} = \frac{\overrightarrow{n'}}{\|\overrightarrow{n'}\|}$
 
 Pour la fonction de calcul de distance la fonction projète le point sur le plab du triangle puis selon 
@@ -69,7 +70,7 @@ la condition
 \begin{minted}[breakanywhere, xleftmargin=10pt]{python}
 normal_side  = np.dot(self.normal, P) > np.dot(self.normal,self.points[0])
 \end{minted}
-car un point est du bon coté du plan du triangle si $ \langle\vec{p},\vec{n}\rangle > \langle\vec{A},\vec{n}\rangle$
+car un point est du bon coté du plan du triangle si $ \langle\vec{p},\vec{n}\rangle > \langle\vec{A},\vec{n}\rangle $
 
 \subsection{Objet II: Tetra}
 \vspace{10pt}
@@ -116,14 +117,16 @@ est du mauvais côté la distance est infini.
 
 \subsection{Objet I : mesh}
 \vspace{10pt}
-\begin{minted}[breakanywhere, xleftmargin=10pt]{python}
+\begin{minted}[breakanywhere=true, xleftmargin=10pt]{python}
 
-class tetra:
+class mesh:
 	def __init__ (self, DefenseFile):
 		...
 	def getNextValue(self)::
 		...
 	def toVector(self,string):
+		...
+	def	radialVect(self,angle_in_degrees):
 		...
 	def Create_Mesh_And_Connectivity_List(self, List_Of_Point, Connectivity):
 		...
@@ -131,6 +134,5 @@ class tetra:
 		...
 
 \end{minted}
-
 
 \end{document}
